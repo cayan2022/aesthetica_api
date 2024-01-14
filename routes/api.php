@@ -41,7 +41,6 @@ Route:: as('site.')
         Route::get('sources', SourceController::class)->name('sources');
         Route::get('branches', BranchController::class)->name('branches');
         Route::get('services', ServiceController::class)->name('services');
-        Route::get('services/{category}', [ServiceController::class, 'getServiceByCategory'])->name('services.category');
         Route::get('offers', OfferController::class)->name('offers');
         Route::get('doctors', DoctorController::class)->name('doctors');
         Route::get('abouts', AboutController::class)->name('abouts');
