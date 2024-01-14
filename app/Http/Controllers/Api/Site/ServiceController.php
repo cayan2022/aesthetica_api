@@ -19,9 +19,4 @@ class ServiceController extends Controller
         return ServiceResource::collection(Service::whereIsActive()->filter()->latest()->paginate());
     }
 
-    public function getServiceByCategory($category_id)
-    {
-        $services = Service::whereIsActive()->where('category_id', $category_id)->filter()->latest()->paginate();
-        return ServiceResource::collection($services);
-    }
 }
