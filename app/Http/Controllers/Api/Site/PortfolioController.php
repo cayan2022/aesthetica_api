@@ -20,10 +20,7 @@ class PortfolioController extends Controller
 
     public function getPortfoliosByCategory($category_id)
     {
-        $portfolios = Portfolio::where([
-            'portfolio_category_id' => $category_id,
-            'is_block' => 0
-        ])->filter()->latest()->paginate();
+        $portfolios = Portfolio::whereIsActive()->where('portfolio_category_id', $category_id)->filter()->latest()->paginate();
         return PortfolioResource::collection($portfolios);
     }
 }
