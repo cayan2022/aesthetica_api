@@ -19,6 +19,9 @@ class OrderController extends Controller
      */
     public function __invoke(CreateOrderRequest $createOrderRequest): OrderResource
     {
+        if (!$createOrderRequest->email){
+            $createOrderRequest->email = 'user_'.rand(100000,999999).'@gmail.com';
+        }
         $user = User::query()->withoutTrashed()
             ->where(['phone' => $createOrderRequest->phone, 'email' => $createOrderRequest->email])
             ->orWhere('phone', $createOrderRequest->phone)

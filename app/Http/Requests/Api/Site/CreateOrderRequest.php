@@ -31,7 +31,8 @@ class CreateOrderRequest extends FormRequest
             'category_id' => 'required|integer|exists:categories,id',
             'branch_id'=>'required|integer|exists:branches,id',
             'phone'=>['required',Rule::phone()->country(Country::query()->pluck('iso_code')->toArray())],
-            'email'=>['required', 'email:rfc,dns']
+            'email'=>['nullable', 'email:rfc,dns']
+//            'email'=>['required', 'email:rfc,dns']
         ];
     }
 }
