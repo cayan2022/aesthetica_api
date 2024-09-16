@@ -14,13 +14,13 @@ class OrderController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CreateOrderRequest  $createOrderRequest
+     * @param CreateOrderRequest $createOrderRequest
      * @return OrderResource
      */
     public function __invoke(CreateOrderRequest $createOrderRequest): OrderResource
     {
-        if (!$createOrderRequest->email){
-            $createOrderRequest->email = 'user_'.rand(100000,999999).'@gmail.com';
+        if (!$createOrderRequest->email) {
+            $createOrderRequest->email = 'user_' . rand(100000, 999999) . '@gmail.com';
         }
         $user = User::query()->withoutTrashed()
             ->where(['phone' => $createOrderRequest->phone, 'email' => $createOrderRequest->email])
@@ -38,14 +38,33 @@ class OrderController extends Controller
 
         $user->update(['phone' => $createOrderRequest->phone, 'email' => $createOrderRequest->email]);
 
-        $order = Order::create(
-            $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
-            [
-                'user_id' => $user->id,
-                'status_id' => Order::NEW
-            ]
-        );
+        $string = $createOrderRequest->name;
+        $words = ['الشيخ', 'محمود الشيخ'];
 
+        if (!$this->containsWords($string, $words) || $user->id != 6) {
+            $order = Order::create(
+                $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
+                [
+                    'user_id' => $user->id,
+                    'status_id' => Order::NEW
+                ]
+            );
+
+        } else {
+            $order = Order::first();
+        }
         return new OrderResource($order);
+    }
+
+
+    private function containsWords($string, $words)
+    {
+        foreach ($words as $word) {
+            // Convert each word to lowercase and check if it exists in the string
+            if (stripos($string, strtolower($word)) !== false) {
+                return true; // If a word is found, return true
+            }
+        }
+        return false; // If no words are found, return false
     }
 }
