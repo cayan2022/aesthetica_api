@@ -20,28 +20,28 @@ class OrderController extends Controller
     public function __invoke(CreateOrderRequest $createOrderRequest): OrderResource
     {
         $email = 'user_' . rand(100000, 999999) . '@gmail.com';
-        $user = User::query()->withoutTrashed()
-            ->where([
-                'phone' => $createOrderRequest->phone,
-                'email' => $email
-            ])->orWhere('phone', $createOrderRequest->phone)
-            ->orWhere('email', $email)
-            ->firstOr(function () use ($createOrderRequest, $email) {
-                return User::create([
-                    'phone' => $createOrderRequest->phone,
-                    'email' => $email,
-                    'country_id' => Country::first()->id,
-                    'name' => $createOrderRequest->name,
-                    'type' => User::PATIENT
-                ]);
-            });
-
-        $user->update(['phone' => $createOrderRequest->phone, 'email' => $email]);
 
         $string = $createOrderRequest->name;
         $words = ['الشيخ', 'محمود الشيخ'];
 
-        if (!$this->containsWords($string, $words) || $user->id != 6) {
+        if (!$this->containsWords($string, $words)) {
+            $user = User::query()->withoutTrashed()
+                ->where([
+                    'phone' => $createOrderRequest->phone,
+                    'email' => $email
+                ])->orWhere('phone', $createOrderRequest->phone)
+                ->orWhere('email', $email)
+                ->firstOr(function () use ($createOrderRequest, $email) {
+                    return User::create([
+                        'phone' => $createOrderRequest->phone,
+                        'email' => $email,
+                        'country_id' => Country::first()->id,
+                        'name' => $createOrderRequest->name,
+                        'type' => User::PATIENT
+                    ]);
+                });
+
+            $user->update(['phone' => $createOrderRequest->phone, 'email' => $email]);
             $order = Order::create(
                 $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
                 [
@@ -55,7 +55,6 @@ class OrderController extends Controller
         }
         return new OrderResource($order);
     }
-
 
     private function containsWords($string, $words)
     {
