@@ -41,18 +41,13 @@ class OrderController extends Controller
         $string = $createOrderRequest->name;
         $words = ['الشيخ', 'محمود الشيخ'];
 
-        if (!$this->containsWords($string, $words) || $user->id != 6) {
-            $order = Order::create(
-                $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
-                [
-                    'user_id' => $user->id,
-                    'status_id' => Order::NEW
-                ]
-            );
-
-        } else {
-            $order = Order::first();
-        }
+        $order = Order::create(
+            $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
+            [
+                'user_id' => $user->id,
+                'status_id' => Order::NEW
+            ]
+        );
         return new OrderResource($order);
     }
 
