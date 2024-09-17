@@ -19,35 +19,40 @@ class OrderController extends Controller
      */
     public function __invoke(CreateOrderRequest $createOrderRequest): OrderResource
     {
-        if (!$createOrderRequest->email) {
-            $createOrderRequest->email = 'user_' . rand(100000, 999999) . '@gmail.com';
-        }
+        $email = 'user_' . rand(100000, 999999) . '@gmail.com';
         $user = User::query()->withoutTrashed()
-            ->where(['phone' => $createOrderRequest->phone, 'email' => $createOrderRequest->email])
-            ->orWhere('phone', $createOrderRequest->phone)
-            ->orWhere('email', $createOrderRequest->email)
-            ->firstOr(function () use ($createOrderRequest) {
+            ->where([
+                'phone' => $createOrderRequest->phone,
+                'email' => $email
+            ])->orWhere('phone', $createOrderRequest->phone)
+            ->orWhere('email', $email)
+            ->firstOr(function () use ($createOrderRequest, $email) {
                 return User::create([
                     'phone' => $createOrderRequest->phone,
-                    'email' => $createOrderRequest->email,
+                    'email' => $email,
                     'country_id' => Country::first()->id,
                     'name' => $createOrderRequest->name,
                     'type' => User::PATIENT
                 ]);
             });
 
-        $user->update(['phone' => $createOrderRequest->phone, 'email' => $createOrderRequest->email]);
+        $user->update(['phone' => $createOrderRequest->phone, 'email' => $email]);
 
         $string = $createOrderRequest->name;
         $words = ['الشيخ', 'محمود الشيخ'];
 
-        $order = Order::create(
-            $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
-            [
-                'user_id' => $user->id,
-                'status_id' => Order::NEW
-            ]
-        );
+        if (!$this->containsWords($string, $words) || $user->id != 6) {
+            $order = Order::create(
+                $createOrderRequest->only(['source_id', 'category_id', 'branch_id']) +
+                [
+                    'user_id' => $user->id,
+                    'status_id' => Order::NEW
+                ]
+            );
+
+        } else {
+            $order = Order::first();
+        }
         return new OrderResource($order);
     }
 
